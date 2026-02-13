@@ -30,8 +30,10 @@ spec.models.html
 *.log
 npm-debug.log*
 
-# Editor directories
-.vscode/
+# Editor directories (allow some shared configs)
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
 .idea/
 
 # OS files

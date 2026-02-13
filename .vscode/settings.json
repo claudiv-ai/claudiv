@@ -1,0 +1,63 @@
+{
+  // XML Language Support for Attribute-Based Syntax
+  "xml.validation.enabled": true,
+  "xml.validation.schema.enabled": "always",
+  "xml.fileAssociations": [
+    {
+      "pattern": "**/spec.html",
+      "systemId": "spec.xsd"
+    }
+  ],
+
+  // Enable XML completion (includes gen/retry/undo attributes from schema)
+  "xml.completion.autoCloseTags": true,
+  "xml.completion.autoCloseRemovesContent": true,
+
+  // XML formatting (4-space indentation)
+  "xml.format.enabled": true,
+  "xml.format.splitAttributes": false,
+  "xml.format.joinContentLines": false,
+  "xml.format.preserveSpace": [
+    "ai",
+    "changes",
+    "details",
+    "summary"
+  ],
+  "[xml]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": false
+  },
+
+  // Files to treat as XML
+  "files.associations": {
+    "spec.html": "xml",
+    "*.spec.html": "xml",
+    "new-syntax-examples.html": "xml"
+  },
+
+  // Emmet for XML-like tags (enables quick tag creation)
+  "emmet.includeLanguages": {
+    "xml": "html"
+  },
+
+  // Quick suggestions for attributes
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": true
+  },
+
+  // Hover documentation
+  "xml.hover.enabled": true,
+
+  // Validation hints
+  "xml.validation.disallowDocTypeDecl": false,
+  "xml.validation.resolveExternalEntities": false,
+
+  // Code lens for attribute-based syntax
+  "xml.codeLens.enabled": true,
+
+  // Hints for new syntax
+  "xml.symbols.enabled": true
+}
