@@ -1,0 +1,56 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment variables
+.env
+.env.local
+
+# Generated files (flexible file format support)
+*.generated.html
+*.generated.js
+*.generated.css
+*.code.html
+*.spec.html
+*.rules.html
+*.models.html
+*.tests.html
+*.api.html
+*.docs.html
+*.data.html
+*.workflows.html
+spec.code.html
+spec.spec.html
+spec.rules.html
+spec.models.html
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor directories
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.swp
+*~
+
+# Turborepo
+.turbo
+
+# pnpm
+pnpm-lock.yaml
+
+# TypeScript
+*.tsbuildinfo
+
+# Claude Code project context
+.claude/projects/
