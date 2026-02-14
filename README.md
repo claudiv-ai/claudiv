@@ -168,24 +168,135 @@ Use `style` or any attribute to reference other components:
 ## Installation
 
 ```bash
-npm install -g @claudiv/core
+npm install -g @amirguterman/claudiv
+
+# Or run directly with npx (no install needed)
+npx @amirguterman/claudiv
 ```
 
 **Requirements:**
 - Node.js 20+
 - Claude Code CLI (for CLI mode) or Anthropic API key (for API mode)
 
-## CLI Usage
+## CLI
+
+### Quick Start (Empty Folder)
 
 ```bash
-# Generate from .cdml
-claudiv app.cdml
+npx @amirguterman/claudiv new myapp
+npx @amirguterman/claudiv gen myapp
+```
 
-# Watch mode (regenerate on save)
-claudiv app.cdml --watch
+### Commands
 
-# Specify target override
-claudiv app.cdml --target python
+```
+claudiv new <name>       Create a new .cdml file
+claudiv gen <name>       Generate code from .cdml
+claudiv reverse <file>   Reverse-engineer file → .cdml
+claudiv watch <name>     Watch and regenerate on changes
+claudiv help             Show full help
+```
+
+### Options
+
+```
+-s, --spec <xml>      Inline .cdml content (for 'new')
+-g, --gen             Generate immediately after 'new'
+-t, --target <name>   Target component or language
+-f, --framework <fw>  Framework (fastapi, express, nextjs, etc.)
+-o, --output <file>   Output file path
+-w, --watch           Watch mode
+--dry-run             Preview without writing files
+```
+
+### Examples
+
+**Create a new project:**
+
+```bash
+claudiv new myapp                              # → myapp.cdml
+claudiv new myapp -t python                    # → Python project template
+claudiv new myapp -t python -f fastapi         # → FastAPI project template
+claudiv new myapp -g                           # → Create + generate immediately
+```
+
+**Create with inline spec:**
+
+```bash
+claudiv new txt2img -s '<txt2img lang="python" type="cli" gen="">
+  <ai provider="openai" />
+  <config apikey organizationid />
+  <args input="text|file, size" output="filename, format" />
+</txt2img>'
+```
+
+**Create with inline spec + generate immediately:**
+
+```bash
+claudiv new txt2img -s '<txt2img lang="python" type="cli" gen="">
+  <ai provider="openai" />
+  <config apikey organizationid />
+  <args input="text|file, size" output="filename, format" />
+</txt2img>' -g
+```
+
+This generates a complete Python CLI project for text-to-image with OpenAI integration, config management, and argument parsing.
+
+**Generate from .cdml:**
+
+```bash
+claudiv gen myapp                              # Generate all from myapp.cdml
+claudiv gen myapp.cdml                         # Explicit path
+claudiv gen myapp -w                           # Watch mode
+claudiv gen myapp -o output.py                 # Custom output file
+```
+
+**Generate specific component (-t):**
+
+```bash
+claudiv gen txt2img -t config                  # Generates txt2img.config
+claudiv gen myapp -t api                       # Generates myapp.api
+claudiv gen myapp -t database                  # Generates myapp.database
+```
+
+**Reverse engineering:**
+
+```bash
+claudiv reverse api.py                         # → api.cdml
+claudiv reverse Button.tsx                     # → Button.cdml
+claudiv reverse backup.sh                      # → backup.cdml
+claudiv reverse styles.css                     # → styles.cdml
+claudiv reverse api.py -o spec.cdml            # Custom output name
+```
+
+**Watch mode:**
+
+```bash
+claudiv watch myapp                            # Watch myapp.cdml
+claudiv gen myapp -w                           # Same as above
+```
+
+### Full Example: Text-to-Image CLI
+
+```bash
+# 1. Create project in empty folder
+mkdir txt2img && cd txt2img
+npx @amirguterman/claudiv new txt2img -s '<txt2img lang="python" type="cli" gen="">
+  <ai provider="openai" />
+  <config apikey organizationid />
+  <args input="text|file, size" output="filename, format" />
+</txt2img>' -g
+
+# 2. Claudiv generates a Python project:
+#    txt2img.py        - Main CLI entry point
+#    config.py         - API key and org configuration
+#    requirements.txt  - Dependencies
+
+# 3. Generate just the config:
+claudiv gen txt2img -t config
+
+# 4. Watch for changes:
+claudiv watch txt2img
 ```
 
 ---
