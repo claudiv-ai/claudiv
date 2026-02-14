@@ -167,12 +167,23 @@ Use `style` or any attribute to reference other components:
 
 ## Installation
 
+**From GitHub Packages:**
+
 ```bash
+# Configure npm to use GitHub Packages for @amirguterman scope
+echo "@amirguterman:registry=https://npm.pkg.github.com" >> ~/.npmrc
+
+# Install globally
 npm install -g @amirguterman/claudiv
 
 # Or run directly with npx (no install needed)
 npx @amirguterman/claudiv
 ```
+
+> **Note:** GitHub Packages requires authentication. Create a [personal access token](https://github.com/settings/tokens) with `read:packages` scope, then:
+> ```bash
+> npm login --registry=https://npm.pkg.github.com --scope=@amirguterman
+> ```
 
 **Requirements:**
 - Node.js 20+
