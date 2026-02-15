@@ -6,7 +6,7 @@ import chokidar, { type FSWatcher } from 'chokidar';
 import debounce from 'lodash.debounce';
 import { EventEmitter } from 'events';
 import { logger } from './utils/logger.js';
-import type { Config } from './types.js';
+import type { Config } from '@claudiv/core';
 
 export class SpecFileWatcher extends EventEmitter {
   private watcher: FSWatcher | null = null;

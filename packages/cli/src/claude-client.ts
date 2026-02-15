@@ -5,7 +5,7 @@
 import { ClaudeCLIClient } from './claude-cli.js';
 import { ClaudeAPIClient } from './claude-api.js';
 import { logger } from './utils/logger.js';
-import type { Config, HierarchyContext } from './types.js';
+import type { Config, HierarchyContext } from '@claudiv/core';
 
 export interface ClaudeClient {
   sendPrompt(

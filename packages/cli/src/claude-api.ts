@@ -1,103 +1,94 @@
 /**
- * Claude Code CLI integration via subprocess
+ * Anthropic API integration for direct API access
  */
 
-import { spawn } from 'child_process';
+import Anthropic from '@anthropic-ai/sdk';
 import { logger } from './utils/logger.js';
-import type { HierarchyContext } from './types.js';
-import { buildPromptContext } from './parser.js';
+import type { HierarchyContext } from '@claudiv/core';
+import { buildPromptContext } from '@claudiv/core';
 
-export class ClaudeCLIClient {
+export class ClaudeAPIClient {
+  private client: Anthropic;
+
+  constructor(apiKey: string) {
+    this.client = new Anthropic({
+      apiKey,
+    });
+  }
+
   /**
-   * Send prompt to Claude Code CLI and stream response
+   * Send prompt to Claude API and stream response
    */
   async *sendPrompt(
     userMessage: string,
     context: HierarchyContext
   ): AsyncGenerator<string> {
-    logger.processing('Sending request to Claude CLI...');
+    logger.processing('Sending request to Claude API...');
 
-    // Build full prompt with context
-    const fullPrompt = this.buildPrompt(userMessage, context);
+    // Build system prompt with hierarchy context
+    const systemPrompt = this.buildSystemPrompt(context);
 
-    // Spawn Claude process with --print for non-interactive mode
-    // Unset CLAUDECODE to allow nested invocation
-    const claude = spawn('claude', ['--print', fullPrompt], {
-      stdio: ['ignore', 'pipe', 'pipe'],
-      env: {
-        ...process.env,
-        CLAUDECODE: '', // Unset to allow nested sessions
-      },
-    });
+    try {
+      // Stream from API
+      const stream = await this.client.messages.stream({
+        model: 'claude-opus-4-6',
+        max_tokens: 4096,
+        system: systemPrompt,
+        messages: [
+          {
+            role: 'user',
+            content: userMessage,
+          },
+        ],
+      });
 
-    let hasOutput = false;
+      let chunkCount = 0;
 
-    // Stream stdout chunks
-    for await (const chunk of claude.stdout) {
-      hasOutput = true;
-      yield chunk.toString('utf-8');
-    }
-
-    // Collect errors
-    let errorOutput = '';
-    claude.stderr.on('data', (data) => {
-      errorOutput += data.toString();
-    });
-
-    // Wait for process to complete
-    const exitCode = await new Promise<number | null>((resolve) => {
-      claude.on('close', resolve);
-    });
-
-    if (exitCode !== 0) {
-      logger.error(`Claude CLI exited with code ${exitCode}`);
-      if (errorOutput) {
-        logger.error(`Error output: ${errorOutput}`);
+      for await (const chunk of stream) {
+        if (
+          chunk.type === 'content_block_delta' &&
+          chunk.delta.type === 'text_delta'
+        ) {
+          chunkCount++;
+          yield chunk.delta.text;
+        }
       }
-      throw new Error(`Claude CLI failed with exit code ${exitCode}`);
-    }
 
-    if (!hasOutput) {
-      logger.warn('No output received from Claude CLI');
+      logger.debug(`Received ${chunkCount} chunks from API`);
+    } catch (error) {
+      const err = error as Error;
+      logger.error(`Claude API error: ${err.message}`);
+      throw error;
     }
-
-    logger.debug('Claude CLI request completed');
   }
 
   /**
-   * Check if Claude CLI is installed
+   * Check if API is available
    */
   async checkAvailable(): Promise<boolean> {
     try {
-      const check = spawn('claude', ['--version'], {
-        env: {
-          ...process.env,
-          CLAUDECODE: '', // Unset to allow check
-        },
+      // Test with a minimal request
+      await this.client.messages.create({
+        model: 'claude-opus-4-6',
+        max_tokens: 10,
+        messages: [{ role: 'user', content: 'test' }],
       });
-
-      const exitCode = await new Promise<number | null>((resolve) => {
-        check.on('close', resolve);
-        check.on('error', () => resolve(null));
-      });
-
-      return exitCode === 0;
+      return true;
     } catch (error) {
+      logger.error('Claude API not available');
       return false;
     }
   }
 
   /**
-   * Build prompt with hierarchy context
+   * Build system prompt with context
    */
-  private buildPrompt(userMessage: string, context: HierarchyContext): string {
+  private buildSystemPrompt(context: HierarchyContext): string {
     const contextStr = buildPromptContext(context);
 
     return `You are an AI assistant helping generate HTML/CSS code from natural language requests.
 
 ${contextStr}
-
-**User Request:** ${userMessage}
 
 **CRITICAL IMPLEMENTATION REQUIREMENTS:**
 ⚠️ NEVER use placeholder comments like "<!-- Child components render here -->" or "<!-- TODO: implement X -->"
@@ -137,7 +128,6 @@ IMPORTANT:
 - Structure your response with nested XML elements
 - Still include code blocks with \`\`\`html and \`\`\`css for implementation
 - EVERY nested component must be fully implemented, not just mentioned in comments
-
-Please respond now.`;
+`;
   }
 }

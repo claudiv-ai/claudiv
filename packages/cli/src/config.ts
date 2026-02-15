@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import { existsSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { logger } from './utils/logger.js';
-import type { Config } from './types.js';
+import type { Config } from '@claudiv/core';
 
 // Load .env file
 dotenv.config();
