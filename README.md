@@ -739,6 +739,31 @@ Claudiv development: write intent → get everything.
 
 Not just code — get working applications, tests, documentation, deployment configs, monitoring, and integrations. All from natural language specifications.
 
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for:
+
+- Development setup
+- Code style guidelines
+- Pull request process
+- Demo generation workflow
+
+Quick start for contributors:
+
+```bash
+# Fork and clone the repo
+git clone https://github.com/YOUR_USERNAME/claudiv.git
+
+# Install dependencies
+npm install
+
+# Build packages
+npm run build
+
+# Link CLI for testing
+cd packages/cli && npm link
+```
+
 ## License
 
 MIT
