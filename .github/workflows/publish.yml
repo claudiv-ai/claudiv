@@ -45,3 +45,8 @@ jobs:
         run: cd packages/vite-sdk && npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish @claudiv/designer
+        run: cd packages/designer && npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
