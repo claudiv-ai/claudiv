@@ -226,10 +226,8 @@ export function setupApi(app: Express, projectRoot: string) {
   // GET /api/aspects/:fqn — Get all aspects for a component
   app.get('/api/aspects/:fqn', async (req, res) => {
     try {
-      const aspects = await discoverAspects([projectRoot]);
-      const componentAspects = aspects.filter(
-        (a) => a.component === req.params.fqn
-      );
+      const aspectsMap = await discoverAspects([projectRoot]);
+      const componentAspects = aspectsMap.get(req.params.fqn) || [];
       res.json(componentAspects);
     } catch (err) {
       res.status(500).json({ error: String(err) });

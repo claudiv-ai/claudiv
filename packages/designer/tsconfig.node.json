@@ -10,5 +10,5 @@
     "outDir": "dist/server",
     "declaration": true
   },
-  "include": ["server", "vite.config.ts"]
+  "include": ["server"]
 }
