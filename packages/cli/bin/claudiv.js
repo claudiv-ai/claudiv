@@ -9,6 +9,7 @@
  *   claudiv dev [file]           Watch .cdml and process changes
  *   claudiv gen [file]           One-shot generation
  *   claudiv init                 Initialize Claudiv in existing project
+ *   claudiv designer              Launch visual designer
  *   claudiv help                 Show help
  */
 
@@ -35,6 +36,12 @@ for (let i = 0; i < args.length; i++) {
   } else if (arg === '-h' || arg === '--help') {
     showHelp();
     process.exit(0);
+  } else if (arg === '--port') {
+    flags.port = args[++i];
+  } else if (arg === '--open') {
+    flags.open = true;
+  } else if (arg === '--designer') {
+    flags.designer = true;
   } else if (arg === '--mode') {
     flags.mode = args[++i];
   } else if (arg === '--scope') {
@@ -53,6 +60,9 @@ const cmd = positional[0];
 switch (cmd) {
   case 'new':
     routeNew(positional.slice(1), flags);
+    break;
+  case 'designer':
+    cmdDesigner(flags);
     break;
   case 'dev':
     cmdDev(positional[1], flags);
@@ -268,11 +278,89 @@ dist/
   console.log(`  Edit ${name}.cdml to add components`);
 }
 
+// ─── Designer Command ─────────────────────────────────────────
+
+/**
+ * claudiv designer [--port 3200] [--open]
+ *
+ * Launch the visual designer web UI.
+ */
+function cmdDesigner(flags) {
+  const port = flags.port || '3200';
+
+  // Try to find the designer package
+  const designerPaths = [
+    join(__dirname, '../../designer'),           // monorepo sibling
+    join(__dirname, '../node_modules/@claudiv/designer'), // installed dep
+  ];
+
+  let designerRoot = null;
+  for (const p of designerPaths) {
+    if (existsSync(join(p, 'server', 'index.ts')) || existsSync(join(p, 'dist', 'server', 'index.js'))) {
+      designerRoot = p;
+      break;
+    }
+  }
+
+  if (!designerRoot) {
+    console.error('Designer package not found.');
+    console.log('Install it: pnpm add @claudiv/designer');
+    process.exit(1);
+  }
+
+  console.log(`Starting Claudiv Designer on port ${port}...`);
+
+  const envVars = { ...process.env, PORT: port, PROJECT_ROOT: process.cwd() };
+
+  // Prefer compiled JS, fall back to tsx for dev
+  const serverEntry = existsSync(join(designerRoot, 'dist', 'server', 'index.js'))
+    ? join(designerRoot, 'dist', 'server', 'index.js')
+    : join(designerRoot, 'server', 'index.ts');
+
+  const runner = serverEntry.endsWith('.ts') ? 'tsx' : 'node';
+
+  const proc = spawn(runner, [serverEntry], {
+    stdio: 'inherit',
+    cwd: process.cwd(),
+    env: envVars,
+  });
+
+  if (flags.open) {
+    // Give server a moment to start, then open browser
+    setTimeout(() => {
+      const url = `http://localhost:${port}`;
+      try {
+        const openCmd = process.platform === 'darwin' ? 'open' :
+                        process.platform === 'win32' ? 'start' : 'xdg-open';
+        execSync(`${openCmd} ${url}`, { stdio: 'ignore' });
+      } catch {
+        console.log(`Open in browser: ${url}`);
+      }
+    }, 1500);
+  }
+
+  proc.on('exit', (code) => process.exit(code || 0));
+  proc.on('error', (err) => {
+    if (runner === 'tsx') {
+      console.error('tsx not found. Install it: npm i -g tsx');
+    } else {
+      console.error(`Failed to start designer: ${err.message}`);
+    }
+    process.exit(1);
+  });
+}
+
 // ─── Core Commands ─────────────────────────────────────────────
 
 function cmdDev(file, flags) {
   const cdmlFile = resolveFile(file);
   if (!cdmlFile) return;
+
+  // If --designer flag is set, also start the designer server
+  if (flags.designer) {
+    console.log('Starting dev mode with designer...');
+    cmdDesigner({ ...flags, _background: true });
+  }
 
   console.log(`Starting dev mode for ${basename(cdmlFile)}...`);
   startEngine(cdmlFile, { ...flags, watch: true });
@@ -377,6 +465,7 @@ function showQuickStart() {
   console.log('Get started:');
   console.log('  claudiv new vite my-app        Create Vite + Claudiv project');
   console.log('  claudiv new system my-system    Create system project');
+  console.log('  claudiv designer               Launch visual designer');
   console.log('  claudiv help                    Full help');
 }
 
@@ -393,12 +482,16 @@ COMMANDS
   dev [file]            Watch .cdml files and process changes
   gen [file]            One-shot generation from .cdml
   init                  Initialize Claudiv in existing project
+  designer              Launch visual designer web UI
   help                  Show this help
 
 OPTIONS
   --mode <cli|api>      Claude invocation mode (default: cli)
   --scope <path>        Generate specific scope only
   --dry-run             Assemble prompts but don't execute
+  --port <number>       Designer server port (default: 3200)
+  --open                Open browser on designer start
+  --designer            Start designer alongside dev mode
   -v, --version         Show version
   -h, --help            Show help
 
@@ -414,6 +507,11 @@ EXAMPLES
     claudiv gen                          One-shot generation
     claudiv gen --scope "api"            Generate specific scope
     claudiv gen --dry-run                Preview without executing
+
+  Designer:
+    claudiv designer                     Launch visual designer
+    claudiv designer --port 4000 --open  Custom port + auto-open browser
+    claudiv dev --designer               Dev mode with designer
 
   System Components:
     Edit <name>.cdml to define components:
