@@ -1,0 +1,12 @@
+[submodule "packages/core"]
+	path = packages/core
+	url = https://github.com/claudiv-ai/core.git
+[submodule "packages/cli"]
+	path = packages/cli
+	url = https://github.com/claudiv-ai/cli.git
+[submodule "packages/vite-sdk"]
+	path = packages/vite-sdk
+	url = https://github.com/claudiv-ai/vite-sdk.git
+[submodule "packages/designer"]
+	path = packages/designer
+	url = https://github.com/claudiv-ai/designer.git
