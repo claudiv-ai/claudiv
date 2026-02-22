@@ -65,7 +65,7 @@ Claudiv watches for changes, detects diffs, and generates code automatically.
 
 1. **Diff** — The differ compares the current `.cdml` against the cached state to identify exactly what changed.
 2. **Context** — The context engine reads `.claudiv/context.cdml` to gather relevant code files, interface contracts, and architectural facts for the changed scope.
-3. **Execute** — Claude receives a structured prompt with the diff, context, and interface projections, then generates the appropriate code changes.
+3. **Execute** — The Claude Agent SDK receives a structured prompt with the diff, context, and interface projections. Claude can explore the codebase with read-only tools and multi-turn thinking before generating code.
 4. **Commit** — Changes are written atomically. If anything fails, the transaction rolls back.
 
 ## Documentation

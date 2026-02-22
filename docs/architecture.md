@@ -8,7 +8,7 @@ Claudiv is a declarative AI interaction platform. You describe software systems 
 .cdml files ──► Differ ──► Context Engine ──► Executor ──► File System
                   │              │                │
                   ▼              ▼                ▼
-              cached state   context.cdml    claude --print
+              cached state   context.cdml    Claude Agent SDK
 ```
 
 ## Core Processing Pipeline
@@ -36,7 +36,7 @@ The engine assembles a structured prompt containing only the information relevan
 
 ### 3. Headless Execution
 
-The **executor** invokes Claude with the assembled prompt using `claude --print` (CLI mode) or the direct API. There is no conversation state — each invocation is independent and self-contained.
+The **executor** invokes Claude with the assembled prompt using the Claude Agent SDK (SDK mode) or the direct Anthropic API. In SDK mode, Claude can explore the codebase with read-only tools and use multi-turn thinking with sub-agents. If user input is needed, it outputs `<plan:questions>` blocks rather than free-text questions.
 
 ### 4. Transactional Commit
 

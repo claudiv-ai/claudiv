@@ -3,7 +3,7 @@
 ## Prerequisites
 
 - [Node.js](https://nodejs.org/) 20+
-- [Claude CLI](https://docs.anthropic.com/en/docs/claude-cli) or an Anthropic API key
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed (for SDK mode) or an Anthropic API key (for API mode)
 
 ## Create a New Project
 
